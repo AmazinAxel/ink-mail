@@ -1,9 +1,7 @@
 {
   description = "Kindle GTK devshell";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs = { self, nixpkgs }:
     let
@@ -19,21 +17,15 @@
     in
     {
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.meson
-          pkgs.ninja
-          pkgs.pkg-config
-          pkgs.glib
-          pkgs.gtk2
+        buildInputs = with pkgs; [
+          meson
+          ninja
+          pkg-config
+          glib
+          gtk2
+          tinyxxd
           cross.buildPackages.gcc
-          pkgs.vim
-          pkgs.tinyxxd
         ];
-
-        shellHook = ''
-          echo "Kindle target: ${target}"
-          echo "Cross CC: ${cross.buildPackages.gcc}/bin/arm-linux-gnueabihf-gcc"
-        '';
       };
     };
 }

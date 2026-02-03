@@ -12,10 +12,6 @@ sources = files(
   './src/main.cpp',
 )
 
-include_dirs = include_directories(
-  './include/',
-)
-
 # `xxd -i` converts a binary file to a C header file
 xxd_exe = find_program('xxd')
 xxd_gen = generator(
@@ -24,12 +20,9 @@ xxd_gen = generator(
   arguments: ['-i', '-C', '-n', '@PLAINNAME@', '@INPUT@', '@OUTPUT@']
 )
 
-gen_sources = xxd_gen.process(['src/main.ui.xml'])
-
 executable(
   'ink-mail',
-  sources + gen_sources,
-  include_directories: include_dirs,
+  sources,
   dependencies: [
     gtk_dep,
   ],

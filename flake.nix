@@ -21,10 +21,9 @@
           meson
           ninja
           pkg-config
-          glib
           gtk2
           tinyxxd
-          cross.buildPackages.gcc
+          #cross.buildPackages.gcc
         ];
       };
     };

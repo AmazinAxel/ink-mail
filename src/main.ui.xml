@@ -1,6 +1,6 @@
 <interface>
   <object id="window" class="GtkWindow">
-    <property name="title">L:A_N:application_ID:org.kindlemodding.template-kindle-gtk_PC:N</property>
+    <property name="title">L:A_N:application_ID:com.amazinaxel.ink-mail_PC:N</property>
     <property name="default-width">632</property>
     <property name="default-height">840</property>
     <property name="border_width">0</property>

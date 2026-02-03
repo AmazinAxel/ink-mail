@@ -7,8 +7,8 @@ An email client for e-ink displays.
 Run `nix develop` to run the ad hoc devshell. 
 
 ```bash
-meson setup builddir
-meson compile -C builddir
+meson setup build
+meson compile -C build
 ```
 
 ---

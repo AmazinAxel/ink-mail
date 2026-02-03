@@ -6,7 +6,7 @@
 void on_button_quit() {
   g_print("Quit button clicked, goodbye!\n");
   gtk_main_quit();
-}
+};
 
 GtkBuilder *gtk_builder_new_from_embedded_file(const char *data, size_t size) {
   GError *err = NULL;
@@ -50,4 +50,4 @@ int main(int argc, char *argv[]) {
   gtk_main();
 
   return 0;
-}
+};

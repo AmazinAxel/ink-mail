@@ -1,7 +1,7 @@
 project(
-  'template-kindle-gtk',
+  'ink-mail',
   'cpp',
-  version: 'v0.0.1',
+  version: 'v1.0.0',
   default_options: ['cpp_std=c++17'],
   meson_version: '>=1.1'
 )
@@ -27,7 +27,7 @@ xxd_gen = generator(
 gen_sources = xxd_gen.process(['src/main.ui.xml'])
 
 executable(
-  'template_kindle_gtk',
+  'ink-mail',
   sources + gen_sources,
   include_directories: include_dirs,
   dependencies: [
@@ -37,6 +37,6 @@ executable(
   #   Koxtoolchain ships with a GCC version newer than the Kindle technically
   #   supports, but this is fine so long as we statically link the standard
   #   library.
-  cpp_args: '-static-libstdc++',
+  cpp_args: ['-O2', '-static-libstdc++'],
   link_args: ['-static-libstdc++']
 )

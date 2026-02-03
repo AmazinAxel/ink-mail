@@ -24,7 +24,7 @@
           gtk-engine-murrine
           gnome-themes-extra
         ];
-        
+
         # Export themes to fix adwaita warning
         shellHook = ''
           export GTK_PATH="${pkgs.gtk-engine-murrine}/lib/gtk-2.0:${pkgs.gnome-themes-extra}/lib/gtk-2.0"

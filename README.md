@@ -8,7 +8,15 @@ This app is designed to have hardcoded email server login details. This means yo
 
 ## Develop using Nix
 
-Run `nix develop` to run the ad hoc devshell. Run `meson setup build` and then use `meson compile -C build` to build. 
+Run `nix develop` to run the ad hoc devshell. Run `meson setup build` and then use `meson compile -C build` to build.
+
+## Adding icons
+
+This process is kind of confusing so I've outlined it here if you want to add more icons:
+
+Use `rsvg-convert -w 32 -h 32 svg/<img>.svg -o <img>.png` to rasterize svg images for usage. Ink Mail uses [HeroIcons](https://heroicons.com/)
+
+Then use `gdk-pixbuf-csource --name=<png name>_png <png name>.png > <png name>_icon.h` and add `gdk-pixbuf-csource --name=<icon name>_png <icon name>.png > <icon name>_icon.h` to the bottom of generated header file.
 
 ---
 

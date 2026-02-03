@@ -17,6 +17,9 @@
           gtk2
           tinyxxd
 
+          # Rasterize SVG icons
+          librsvg
+
           # Fix warnings
           gtk-engine-murrine
           gnome-themes-extra

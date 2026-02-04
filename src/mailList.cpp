@@ -4,9 +4,7 @@
 #include "icons/arrowBack_icon.h"
 
 int mailList(int argc, char *argv[], GtkWidget *vbox) {
-  
   /* Top title/navigation bar */
-
   GtkWidget *nav = gtk_hbox_new(FALSE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), nav, FALSE, FALSE, 0);
   GtkBox *navBox GTK_BOX(nav);
@@ -15,7 +13,12 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
   GdkPixbuf *exitPixbuf = gdk_pixbuf_new_from_inline(arrowBack_png_len, arrowBack_png, FALSE, NULL);
   GtkWidget *exitIcon = gtk_image_new_from_pixbuf(exitPixbuf);
   g_object_unref(exitPixbuf);
-  gtk_box_pack_start(navBox, exitIcon, FALSE, FALSE, 10);
+
+  GtkWidget *exitButton = gtk_event_box_new();
+  gtk_container_add(GTK_CONTAINER(exitButton), exitIcon);
+  g_signal_connect(exitButton, "button-press-event", gtk_main_quit, NULL);
+  gtk_box_pack_start(navBox, exitButton, FALSE, FALSE, 10);
+  gtk_widget_modify_bg(exitButton, GTK_STATE_NORMAL, &white);
 
   GtkWidget *leftCenterSpacer = gtk_label_new(NULL);
   gtk_box_pack_start(navBox, leftCenterSpacer, TRUE, TRUE, 0);
@@ -48,8 +51,6 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
 
   // Make scrollable background white
   GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
-  GdkColor white;
-  gdk_color_parse("#fff", &white);
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
   gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);

@@ -13,6 +13,7 @@ sources = files(
   './src/mailList.cpp',
   './src/mailPage.cpp',
   './src/main.cpp',
+  './src/utils.cpp',
 )
 
 # `xxd -i` converts a binary file to a C header file

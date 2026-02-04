@@ -1,13 +1,15 @@
 #include <gtk-2.0/gtk/gtk.h>
 #include <string> // std::string
+#include "../app.hpp"
 #include "../icons/mail_icon.h"
 #include "../icons/clock_icon.h"
 
-GtkWidget *mailItem(const char *title, const char *message, const char *sender, const char *time) {
+GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time) {
   GtkWidget *hbox = gtk_vbox_new(FALSE, 2);
   GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *titleRow = gtk_hbox_new(FALSE, 2);
-  //gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new(title), FALSE, FALSE, 0);
+  GtkWidget *eventBox = gtk_event_box_new();
+  gtk_event_box_set_visible_window(GTK_EVENT_BOX(eventBox), FALSE);
 
   // GTK2 doesnt have horizontal rules or gtk.seperator so we use this workaround
   GtkWidget *line = gtk_event_box_new();
@@ -61,8 +63,8 @@ GtkWidget *mailItem(const char *title, const char *message, const char *sender, 
   gtk_box_pack_start(GTK_BOX(box), senderLabel, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(box), messageLabel, FALSE, FALSE, 0);
 
-  // todo
-  //gtk_container_add(GTK_CONTAINER(event), frame);
-
-  return box;
+  // Clickable event box
+  gtk_container_add(GTK_CONTAINER(eventBox), box);
+  g_signal_connect(eventBox, "button-press-event", G_CALLBACK(mailPage(vbox, title, message, sender, time)), (gpointer)title);
+  return eventBox;
 };

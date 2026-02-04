@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   gtk_widget_modify_bg(window, GTK_STATE_NORMAL, &white);
 
   // Default view
-  mailList(argc, argv, vbox);
+  mailList(vbox);
 
   gtk_widget_show_all(window);
   g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);

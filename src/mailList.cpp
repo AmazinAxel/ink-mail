@@ -3,13 +3,20 @@
 #include "icons/refresh_icon.h"
 #include "icons/arrowBack_icon.h"
 
-int mailList(int argc, char *argv[], GtkWidget *vbox) {
+void refreshMail(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+  GtkWidget *vbox = GTK_WIDGET(data);
+  mailList(vbox);
+};
+
+int mailList(GtkWidget *vbox) {
+  clearWindow(vbox); // Cleanup
+
   /* Top title/navigation bar */
   GtkWidget *nav = gtk_hbox_new(FALSE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), nav, FALSE, FALSE, 0);
-  GtkBox *navBox GTK_BOX(nav);
+  GtkBox *navBox = GTK_BOX(nav);
 
-  // Exit
+  // Exit button
   GdkPixbuf *exitPixbuf = gdk_pixbuf_new_from_inline(arrowBack_png_len, arrowBack_png, FALSE, NULL);
   GtkWidget *exitIcon = gtk_image_new_from_pixbuf(exitPixbuf);
   g_object_unref(exitPixbuf);
@@ -31,11 +38,16 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
   GtkWidget *rightCenterSpacer = gtk_label_new(NULL);
   gtk_box_pack_start(navBox, rightCenterSpacer, TRUE, TRUE, 0);
 
-  // Refresh
+  // Refresh button
   GdkPixbuf *refreshPixbuf = gdk_pixbuf_new_from_inline(refresh_png_len, refresh_png, FALSE, NULL);
   GtkWidget *refreshIcon = gtk_image_new_from_pixbuf(refreshPixbuf);
   g_object_unref(refreshPixbuf);
-  gtk_box_pack_end(navBox, refreshIcon, FALSE, FALSE, 10);
+
+  GtkWidget *refreshButton = gtk_event_box_new();
+  gtk_container_add(GTK_CONTAINER(refreshButton), refreshIcon);
+  g_signal_connect(refreshButton, "button-press-event", G_CALLBACK(refreshMail), vbox);
+  gtk_widget_modify_bg(refreshButton, GTK_STATE_NORMAL, &white);
+  gtk_box_pack_end(navBox, refreshButton, FALSE, FALSE, 10);
 
   /* Mail list */
 
@@ -53,16 +65,16 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
   GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (2)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (3)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (4)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (5)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (6)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (7)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (8)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (9)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (10)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (2)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (3)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (4)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (5)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (6)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (7)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (8)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (9)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (10)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
 
   return 0;
 };

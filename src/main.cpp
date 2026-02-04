@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
   mailList(argc, argv, vbox);
 
   gtk_widget_show_all(window);
+
+  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
   gtk_main();
   return 0;
 };

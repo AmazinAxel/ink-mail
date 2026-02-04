@@ -1,8 +1,5 @@
 #include <gtk-2.0/gtk/gtk.h>
 #include "app.hpp"
-#include <iostream>
-#include <thread>
-#include <list>
 #include "icons/refresh_icon.h"
 #include "icons/arrowBack_icon.h"
 

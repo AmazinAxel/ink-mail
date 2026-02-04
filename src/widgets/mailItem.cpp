@@ -1,8 +1,5 @@
 #include <gtk-2.0/gtk/gtk.h>
-#include "../app.hpp"
-#include <iostream>
-#include <thread>
-#include <list>
+#include <string> // std::string
 #include "../icons/mail_icon.h"
 #include "../icons/clock_icon.h"
 

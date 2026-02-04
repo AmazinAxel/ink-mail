@@ -49,13 +49,23 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
   gtk_container_add(GTK_CONTAINER(centerAlign), listBox);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mailListScrollbar), centerAlign);
 
-  // White scrollable background
   GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
+
+  // Make scrollable background white
   GdkColor white;
-  gdk_color_parse("#fff", &white);
+  gdk_color_parse("#fff", &white); 
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem("eee", "ee", "e"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (2)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (3)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (4)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (5)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (6)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (7)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (8)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (9)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("This is a message subject (10)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
 
   return 0;
 };

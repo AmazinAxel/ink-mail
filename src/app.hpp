@@ -8,3 +8,4 @@ struct emailData {
 };
 
 int mailList(int argc, char *argv[], GtkWidget *vbox);
+GtkWidget* mailItem(const char *title, const char *message, const char *sender);

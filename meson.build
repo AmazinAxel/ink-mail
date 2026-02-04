@@ -9,6 +9,7 @@ project(
 gtk_dep = dependency('gtk+-2.0')
 
 sources = files(
+  './src/widgets/mailItem.cpp',
   './src/mailList.cpp',
   './src/mailPage.cpp',
   './src/main.cpp',

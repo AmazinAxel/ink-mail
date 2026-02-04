@@ -4,7 +4,7 @@ An email client for e-ink displays.
 
 ## Build yourself
 
-This app is designed to have hardcoded email server login details. This means you must compile the program yourself with this information.
+Email server login details are hardcoded into the build process. You must compile the program yourself to enter your email server details.
 
 ## Develop using Nix
 

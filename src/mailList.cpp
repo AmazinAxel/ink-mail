@@ -49,5 +49,13 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
   gtk_container_add(GTK_CONTAINER(centerAlign), listBox);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mailListScrollbar), centerAlign);
 
+  // White scrollable background
+  GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
+  GdkColor white;
+  gdk_color_parse("#fff", &white);
+  gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
+
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem("eee", "ee", "e"), FALSE, FALSE, 0);
+
   return 0;
 };

@@ -1,6 +1,4 @@
 {
-  description = "Ink Mail Kindle devshell";
-
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
   outputs = { self, nixpkgs }:
@@ -20,12 +18,12 @@
           # Rasterize SVG icons
           librsvg
 
-          # Fix warnings
+          # Fix adwaita warnings
           gtk-engine-murrine
           gnome-themes-extra
         ];
 
-        # Export themes to fix adwaita warning
+        # Fix adwaita warning
         shellHook = ''
           export GTK_PATH="${pkgs.gtk-engine-murrine}/lib/gtk-2.0:${pkgs.gnome-themes-extra}/lib/gtk-2.0"
         '';

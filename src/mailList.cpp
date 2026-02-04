@@ -8,47 +8,36 @@
 
 int mailList(int argc, char *argv[], GtkWidget *vbox) {
   
-  // Title
-  GtkWidget *titleMi = gtk_menu_item_new();
-  GtkWidget *titleLabel = gtk_label_new(NULL);
-  gtk_label_set(GTK_LABEL(titleLabel), "Mail");
+  /* Top title/navigation bar */
 
-  gtk_container_add(GTK_CONTAINER(titleMi), titleLabel);
-  gtk_widget_set_sensitive(titleMi, FALSE);
-  gtk_widget_set_can_focus(titleMi, FALSE);
+  GtkWidget *nav = gtk_hbox_new(FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), nav, FALSE, FALSE, 0);
+  GtkBox *navBox GTK_BOX(nav);
 
-  gtk_misc_set_alignment(GTK_MISC(titleLabel), 0.5, 0); // center
-  gtk_container_add(GTK_CONTAINER(vbox), titleMi);
-
-
-  // Refresh Button
-  GtkWidget *refreshMi = gtk_menu_item_new();
-  GtkWidget *refreshHbox = gtk_hbox_new(FALSE, 6);
-
-  GtkWidget *refreshLabel = gtk_label_new("Refresh");
-  gtk_box_pack_start(GTK_BOX(refreshHbox), refreshLabel, FALSE, FALSE, 0);
-
-  GdkPixbuf *refreshPixbuf = gdk_pixbuf_new_from_inline(refresh_png_len, refresh_png, FALSE, NULL);
-  GtkWidget *refreshIcon = gtk_image_new_from_pixbuf(refreshPixbuf);
-  g_object_unref(refreshPixbuf);
-  gtk_box_pack_start(GTK_BOX(refreshHbox), refreshIcon, FALSE, FALSE, 0);
-
-//  gtk_misc_set_alignment(GTK_CONTAINER(refreshHbox), 1, 0); // right
-  gtk_container_add(GTK_CONTAINER(vbox), refreshHbox);
-
-  // Exit Button
-  GtkWidget *exitMi = gtk_menu_item_new();
-  g_signal_connect(G_OBJECT(exitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
-
-  GtkWidget *align = gtk_alignment_new(0, 0.5, 0, 0); // left
-
+  // Exit
   GdkPixbuf *exitPixbuf = gdk_pixbuf_new_from_inline(arrowBack_png_len, arrowBack_png, FALSE, NULL);
   GtkWidget *exitIcon = gtk_image_new_from_pixbuf(exitPixbuf);
   g_object_unref(exitPixbuf);
+  gtk_box_pack_start(navBox, exitIcon, FALSE, FALSE, 10);
 
-  gtk_container_add(GTK_CONTAINER(vbox), exitIcon);
-  gtk_container_add(GTK_CONTAINER(vbox), align);
-  return 0;
+  GtkWidget *leftCenterSpacer = gtk_label_new(NULL);
+  gtk_box_pack_start(navBox, leftCenterSpacer, TRUE, TRUE, 0);
+
+  // Mail title
+  GtkWidget *title = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(title), "<span size=\"30000\" foreground=\"black\">Mail</span>");
+  gtk_box_pack_start(navBox, title, FALSE, FALSE, 0);
+
+  GtkWidget *rightCenterSpacer = gtk_label_new(NULL);
+  gtk_box_pack_start(navBox, rightCenterSpacer, TRUE, TRUE, 0);
+
+  // Refresh
+  GdkPixbuf *refreshPixbuf = gdk_pixbuf_new_from_inline(refresh_png_len, refresh_png, FALSE, NULL);
+  GtkWidget *refreshIcon = gtk_image_new_from_pixbuf(refreshPixbuf);
+  g_object_unref(refreshPixbuf);
+  gtk_box_pack_end(navBox, refreshIcon, FALSE, FALSE, 10);
+
+  /* Mail list */
 
   GtkWidget *mailListScrollbar = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(mailListScrollbar), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -59,4 +48,6 @@ int mailList(int argc, char *argv[], GtkWidget *vbox) {
 
   gtk_container_add(GTK_CONTAINER(centerAlign), listBox);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mailListScrollbar), centerAlign);
-}
+
+  return 0;
+};

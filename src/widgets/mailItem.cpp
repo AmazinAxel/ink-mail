@@ -50,6 +50,17 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
   GtkWidget *clockIcon = gtk_image_new_from_pixbuf(clockIconScaled);
   g_object_unref(clockIconScaled);
 
+  // Scaled down email icon
+  GtkWidget *senderRow = gtk_hbox_new(FALSE, 3); // 3px padding
+  GdkPixbuf *mailIconPixbuf = gdk_pixbuf_new_from_inline(mail_png_len, mail_png, FALSE, NULL);
+
+  GdkPixbuf *mailIconScaled = gdk_pixbuf_scale_simple(mailIconPixbuf, 20, 20, GDK_INTERP_BILINEAR);
+  g_object_unref(mailIconPixbuf);
+  GtkWidget *mailIcon = gtk_image_new_from_pixbuf(mailIconScaled);
+  g_object_unref(mailIconScaled);
+  gtk_box_pack_start(GTK_BOX(senderRow), mailIcon, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(senderRow), senderLabel, FALSE, FALSE, 0);
+
   /* Layout */
   // Title + time + icons on same row
   gtk_box_pack_start(GTK_BOX(titleRow), titleLabel, TRUE, TRUE, 0); // Expands to right
@@ -58,7 +69,7 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   // Title, sender, message
   gtk_box_pack_start(GTK_BOX(box), titleRow, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(box), senderLabel, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(box), senderRow, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(box), messageLabel, FALSE, FALSE, 0);
 
   // Clickable event box

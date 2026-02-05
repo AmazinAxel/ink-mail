@@ -2,6 +2,7 @@
 #include "app.hpp"
 #include "icons/refresh_icon.h"
 #include "icons/arrowBack_icon.h"
+#include "icons/mail_icon.h"
 
 void refreshMail(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   GtkWidget *vbox = GTK_WIDGET(data);
@@ -30,10 +31,16 @@ int mailList(GtkWidget *vbox) {
   GtkWidget *leftCenterSpacer = gtk_label_new(NULL);
   gtk_box_pack_start(navBox, leftCenterSpacer, TRUE, TRUE, 0);
 
+  // Mail icon
+  GdkPixbuf *mailPixbuf = gdk_pixbuf_new_from_inline(mail_png_len, mail_png, FALSE, NULL);
+  GtkWidget *mailIcon = gtk_image_new_from_pixbuf(mailPixbuf);
+  g_object_unref(mailPixbuf);
+  gtk_box_pack_start(navBox, mailIcon, FALSE, FALSE, 0);
+
   // Mail title
   GtkWidget *title = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(title), "<span size=\"30000\" foreground=\"black\">Mail</span>");
-  gtk_box_pack_start(navBox, title, FALSE, FALSE, 0);
+  gtk_box_pack_start(navBox, title, FALSE, FALSE, 10);
 
   GtkWidget *rightCenterSpacer = gtk_label_new(NULL);
   gtk_box_pack_start(navBox, rightCenterSpacer, TRUE, TRUE, 0);
@@ -76,5 +83,6 @@ int mailList(GtkWidget *vbox) {
   gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (9)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (10)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
 
+  gtk_widget_show_all(vbox);
   return 0;
 };

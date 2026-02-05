@@ -4,17 +4,23 @@
 #include "../icons/mail_icon.h"
 #include "../icons/clock_icon.h"
 
+gboolean openMail(GtkWidget *eventBox, GdkEventButton *event, gpointer data) {
+  Mail *ctx = (Mail*)data;
+
+  GtkWidget *page = mailPage(ctx->vbox, ctx->title, ctx->message, ctx->sender, ctx->time);
+  gtk_box_pack_start(GTK_BOX(ctx->vbox), page, TRUE, TRUE, 0);
+  gtk_widget_show_all(ctx->vbox);
+
+  return true;
+};
+
 GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time) {
-  GtkWidget *hbox = gtk_vbox_new(FALSE, 2);
-  GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *titleRow = gtk_hbox_new(FALSE, 2);
+  GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *eventBox = gtk_event_box_new();
   gtk_event_box_set_visible_window(GTK_EVENT_BOX(eventBox), FALSE);
 
-  // GTK2 doesnt have horizontal rules or gtk.seperator so we use this workaround
-  GtkWidget *line = gtk_event_box_new();
-  gtk_widget_set_size_request(line, -1, 2); // full width + 2px height
-  gtk_box_pack_start(GTK_BOX(box), line, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(box), horizontalRule(), FALSE, FALSE, 0);
 
   // Labels
   GtkWidget *titleLabel = gtk_label_new(NULL);
@@ -37,14 +43,6 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
   gtk_label_set_markup(GTK_LABEL(timeLabel), timeMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(timeLabel), 1.0, 0.5); // Right align
 
-  /*
-  // Mail icon
-  GdkPixbuf *mailIconPixbuf = gdk_pixbuf_new_from_inline(mail_png_len, mail_png, FALSE, NULL);
-  GtkWidget *mailIcon = gtk_image_new_from_pixbuf(mailIconPixbuf);
-  g_object_unref(mailIconPixbuf);
-  gtk_box_pack_start(GTK_BOX(box), mailIcon, FALSE, FALSE, 0);
-  */
-
   // Scaled down clock icon
   GdkPixbuf *clockIconPixbuf = gdk_pixbuf_new_from_inline(clock_png_len, clock_png, FALSE, NULL);
   GdkPixbuf *clockIconScaled = gdk_pixbuf_scale_simple(clockIconPixbuf, 25, 25, GDK_INTERP_BILINEAR);
@@ -65,6 +63,7 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   // Clickable event box
   gtk_container_add(GTK_CONTAINER(eventBox), box);
-  g_signal_connect(eventBox, "button-press-event", G_CALLBACK(mailPage(vbox, title, message, sender, time)), (gpointer)title);
+  Mail *ctx = new Mail{vbox, title, message, sender, time};
+  g_signal_connect(eventBox, "button-press-event", G_CALLBACK(openMail), ctx);
   return eventBox;
 };

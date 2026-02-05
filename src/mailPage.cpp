@@ -7,14 +7,10 @@
 GtkWidget *mailPage(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time) {
   clearWindow(vbox); // Cleanup
 
-  GtkWidget *hbox = gtk_vbox_new(FALSE, 2);
   GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *titleRow = gtk_hbox_new(FALSE, 2);
 
-  // GTK2 doesnt have horizontal rules or gtk.seperator so we use this workaround
-  GtkWidget *line = gtk_event_box_new();
-  gtk_widget_set_size_request(line, -1, 2); // full width + 2px height
-  gtk_box_pack_start(GTK_BOX(box), line, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(box), horizontalRule(), FALSE, FALSE, 0);
 
   // Labels
   GtkWidget *titleLabel = gtk_label_new(NULL);

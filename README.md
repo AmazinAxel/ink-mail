@@ -6,9 +6,15 @@ An email client for e-ink displays.
 
 Email server login details are hardcoded into the build process. You must compile the program yourself to enter your email server details.
 
+### Prebuilt binaries
+
+I only provide prebuilt binaries as a testing convinience. Since this program offers no way of entering or saving email logins, all my prebuilt binaries provided use a test email that I set up. You can email it at `inkling@amazinaxel.com` and use the prebuilt to preview those messages in real time. I may shut down the email in the future.
+
 ## Develop using Nix
 
-In the project directory, run `nix develop` to run the ad hoc devshell. Run `meson setup build` and then use `meson compile -C build` to build. Run your IDE instance in this devshell to have working intellisense.
+In the project directory, run `nix develop` to run the ad hoc devshell. Run `meson setup build -Dimap=imaps://imap.youremailserverhere.com:993/INBOX -Demail=inkling@amazinaxel.com -Dpassword=password` and then build: `meson compile -C build`
+
+Run your IDE instance in this devshell to have working intellisense.
 
 ## Adding icons
 

@@ -1,8 +1,10 @@
 #include <gtk-2.0/gtk/gtk.h>
+#include <string>
 #include "app.hpp"
 #include "icons/refresh_icon.h"
 #include "icons/arrowBack_icon.h"
 #include "icons/mail_icon.h"
+#include <curl/curl.h>
 
 void refreshMail(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   GtkWidget *vbox = GTK_WIDGET(data);
@@ -72,16 +74,15 @@ int mailList(GtkWidget *vbox) {
   GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (2)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (3)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (4)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (5)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (6)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (7)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (8)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (9)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, "This is a message subject (10)", "Message content", "axel@amazinaxel.com", "15:20"), FALSE, FALSE, 0);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+  std::string raw = fetch_latest_email_raw(IMAP, EMAIL, PASSWORD);
+  curl_global_cleanup();
+
+  std::string subject = extract_field(raw, "Subject: ");
+  std::string from    = extract_field(raw, "From: ");
+  std::string date    = extract_field(raw, "Date: ");
+
+  gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, subject.c_str(), "Message content", from.c_str(), date.c_str()), FALSE, FALSE, 0);
 
   gtk_widget_show_all(vbox);
   return 0;

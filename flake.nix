@@ -11,6 +11,7 @@
           # For build
           meson
           ninja
+          curl
           pkg-config
           gtk2
           tinyxxd

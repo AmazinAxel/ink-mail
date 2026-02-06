@@ -24,22 +24,22 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   // Labels
   GtkWidget *titleLabel = gtk_label_new(NULL);
-  std::string titleMarkup = "<span size=\"20000\" foreground=\"black\">" + std::string(title) + "</span>";
+  std::string titleMarkup = "<span size=\"20000\" foreground=\"black\">" + std::string(g_markup_escape_text(title, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(titleLabel), titleMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(titleLabel), 0.0, 0.5); // Left align
 
   GtkWidget *messageLabel = gtk_label_new(message);
-  std::string messageMarkup = "<span size=\"15000\" foreground=\"black\">" + std::string(message) + "</span>";
+  std::string messageMarkup = "<span size=\"15000\" foreground=\"black\">" + std::string(g_markup_escape_text(message, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(messageLabel), messageMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(messageLabel), 0.0, 0.5); // Left align
 
   GtkWidget *senderLabel = gtk_label_new(sender);
-  std::string senderMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(sender) + "</span>";
+  std::string senderMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(g_markup_escape_text(sender, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(senderLabel), senderMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(senderLabel), 0.0, 0.5); // Left align
 
   GtkWidget *timeLabel = gtk_label_new(time);
-  std::string timeMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(time) + "</span>";
+  std::string timeMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(g_markup_escape_text(time, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(timeLabel), timeMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(timeLabel), 1.0, 0.5); // Right align
 

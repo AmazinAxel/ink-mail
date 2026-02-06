@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <gtk-2.0/gtk/gtk.h>
 
 struct emailData {
@@ -16,7 +17,6 @@ GtkWidget* mailPage(GtkWidget *vbox, const char *title, const char *message, con
 void clearWindow(GtkWidget *container);
 GtkWidget* horizontalRule();
 
-std::string fetch_latest_email_raw(const std::string &server, const std::string &user, const std::string &pass);
-std::string extract_field(const std::string &src, const std::string &field);
+std::vector<emailData> fetchMail(const std::string &imap, const std::string &email, const std::string &password);
 
 extern GdkColor white; // defined in main.cpp

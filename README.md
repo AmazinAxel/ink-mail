@@ -8,6 +8,10 @@ Email server login details are hardcoded into the build process. You must compil
 
 Note that this app requires your IMAP server to support relative queries (which is quite common but if you encounter errors please try a different server)
 
+## Recommended usage
+
+This program is intended to be used for a dedicated email address. I suggest creating a special email on your server for this device/program and forward any long messages to this email. You can even sign up newsletters on this email to be read on the e-ink display. This program is tested on a Dovecot IMAP server.
+
 ### Prebuilt binaries
 
 I only provide prebuilt binaries as a testing convinience. Since this program offers no way of entering or saving email logins, all my prebuilt binaries provided use a test email that I set up. You can email it at `inkling@amazinaxel.com` and use the prebuilt to preview those messages in real time. I may shut down the email in the future.

@@ -12,6 +12,7 @@ password = get_option('password')
 
 gtk_dep = dependency('gtk+-2.0')
 curl_dep = dependency('libcurl')
+gmime_dep = dependency('gmime-3.0')
 
 sources = files(
   './src/service/getMail.cpp',
@@ -33,7 +34,7 @@ xxd_gen = generator(
 executable(
   'ink-mail',
   sources,
-  dependencies: [ gtk_dep, curl_dep ],
+  dependencies: [ gtk_dep, curl_dep, gmime_dep ],
   cpp_args: ['-O2', '-static-libstdc++', '-Wno-deprecated-declarations',
     '-DIMAP="' + imap + '"',
     '-DEMAIL="' + email + '"',

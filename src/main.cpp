@@ -1,4 +1,5 @@
 #include <gtk-2.0/gtk/gtk.h>
+#include <gmime/gmime.h>
 #include "app.hpp"
 #include "icons/refresh_icon.h"
 #include "icons/arrowBack_icon.h"
@@ -13,6 +14,8 @@ int main(int argc, char *argv[]) {
   gtk_window_set_default_size(windowObj, 600, 800);
   gtk_container_set_border_width(GTK_CONTAINER(window), 5); // App padding
   gdk_color_parse("#fff", &white); // Set white var
+
+  g_mime_init(); // Mail parsing
 
   // Viewbox
   GtkWidget *vbox = gtk_vbox_new(FALSE, 0);

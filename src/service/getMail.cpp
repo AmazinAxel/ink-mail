@@ -1,91 +1,121 @@
 #include <curl/curl.h>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <sstream>
-#include <cctype>
-#include <map>
+#include <gmime/gmime.h>
 #include "../app.hpp"
 
-static size_t writeCb(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    auto *out = static_cast<std::string*>(userdata);
+static size_t writeCb(char* ptr, size_t size, size_t nmemb, void* userdata) { // curl
+    auto* out = static_cast<std::string*>(userdata);
     out->append(ptr, size * nmemb);
     return size * nmemb;
-}
+};
 
-static std::string extractField(const std::string &src, const std::string &field) {
-    size_t pos = src.find(field);
-    if (pos == std::string::npos) return "";
+// gmime get body plaintext helper
+static std::string getPlaintext(GMimeObject* obj) {
+    if (GMIME_IS_PART(obj)) {
+        GMimeContentType* ct = g_mime_object_get_content_type(obj);
+        if (g_mime_content_type_is_type(ct, "text", "plain")) {
+            GMimePart* part = GMIME_PART(obj);
+            GMimeDataWrapper* dw = g_mime_part_get_content(part);
 
-    size_t start = pos + field.size();
-    size_t end = src.find("\r\n", start);
-    if (end == std::string::npos)
-        end = src.find("\n", start);
-    if (end == std::string::npos)
-        end = src.size();
+            GMimeStream* mem = g_mime_stream_mem_new();
+            g_mime_data_wrapper_write_to_stream(dw, mem);
 
-    return src.substr(start, end - start);
-}
+            GMimeStreamMem* smem = GMIME_STREAM_MEM(mem);
+            GByteArray* ba = g_mime_stream_mem_get_byte_array(smem);
 
-static std::vector<std::pair<int,std::string>> parseFetchBlocks(const std::string &raw) {
-    std::vector<std::pair<int,std::string>> out;
+            std::string out;
+            if (ba && ba->data && ba->len)
+                out.assign((char*)ba->data, ba->len);
 
-    size_t i = 0;
-    while (true) {
-        size_t star = raw.find("* ", i);
-        if (star == std::string::npos) break;
+            g_object_unref(mem);
+            return out;
+        };
+    };
+    if (GMIME_IS_MULTIPART(obj)) {
+        GMimeMultipart* mp = GMIME_MULTIPART(obj);
+        int n = g_mime_multipart_get_count(mp);
+        for (int i = 0; i < n; i++) {
+            std::string res = getPlaintext(g_mime_multipart_get_part(mp, i));
+            if (!res.empty())
+                return res;
+        };
+    };
+    return {};
+};
 
-        size_t fetch = raw.find("FETCH", star);
-        if (fetch == std::string::npos) break;
+static bool fetchSingleEmail(const std::string& imap, const std::string& email, const std::string& password, int uid, emailData& out) {
+    CURL* curl = curl_easy_init();
+    std::string response;
+    std::string request = "UID FETCH " + std::to_string(uid) + " (BODY.PEEK[])";
 
-        // Extract UID
-        size_t uidPos = raw.find("UID ", fetch);
-        if (uidPos == std::string::npos) break;
+    curl_easy_setopt(curl, CURLOPT_URL, imap.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERNAME, email.c_str());
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, password.c_str());
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-        uidPos += 4;
-        int uid = std::stoi(raw.substr(uidPos));
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, request.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-        // Find next "* " to mark end of this block
-        size_t next = raw.find("\n* ", star + 1);
-        if (next == std::string::npos)
-            next = raw.size();
+    curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
 
-        std::string block = raw.substr(star, next - star);
-        out.push_back({uid, block});
+    // Get literal length
+    size_t brace = response.find('{');
+    size_t endBrace = response.find('}', brace);
+    int len = std::stoi(response.substr(brace + 1, endBrace - brace - 1));
+    size_t start = response.find("\r\n", endBrace);
+    if (start == std::string::npos)
+        start = response.find("\n", endBrace);
 
-        i = next;
+    start += 2;
+
+    if (start + len > response.size())
+        return false;
+
+    std::string literal = response.substr(start, len);
+
+    // Gmime parse and save in var
+    GMimeStream* stream = g_mime_stream_mem_new_with_buffer((const char*)literal.data(), literal.size());
+    GMimeParser* parser = g_mime_parser_new_with_stream(stream);
+    GMimeMessage* msg = g_mime_parser_construct_message(parser, NULL);
+
+    if (!msg) {
+        g_object_unref(parser);
+        g_object_unref(stream);
+        return false;
     };
 
-    return out;
+    // Message subject
+    const char* subj = g_mime_message_get_subject(msg);
+    if (subj) out.subject = subj;
+
+    // Sender email
+    InternetAddressList* list = g_mime_message_get_from(msg);
+    if (list) out.from = internet_address_mailbox_get_addr(INTERNET_ADDRESS_MAILBOX(internet_address_list_get_address(list, 0)));
+
+    // Formatted date & time
+    GDateTime* dateTime = g_mime_message_get_date(msg);
+    gchar* formattedSendDate = g_date_time_format(dateTime, "%a %b %-d, %Y at %H:%M");
+    out.sendDate = formattedSendDate;
+    g_free(formattedSendDate);
+
+    // Body message
+    GMimeObject* root = g_mime_message_get_mime_part(msg);
+    out.message = getPlaintext(root);
+
+    // Cleanup
+    g_object_unref(msg);
+    g_object_unref(parser);
+    g_object_unref(stream);
+    return true;
 };
 
-static std::string extractLiteral(const std::string &block) {
-    // Look for {1234}
-    size_t brace = block.find('{');
-    if (brace == std::string::npos) return "";
-
-    size_t endBrace = block.find('}', brace);
-    if (endBrace == std::string::npos) return "";
-
-    int len = std::stoi(block.substr(brace + 1, endBrace - brace - 1));
-
-    // Literal starts after CRLF following the brace
-    size_t start = block.find("\r\n", endBrace);
-    if (start == std::string::npos)
-        start = block.find("\n", endBrace);
-    if (start == std::string::npos)
-        return "";
-
-    start += 2; // skip CRLF
-
-    if (start + len > block.size())
-        return block.substr(start); // truncated but safe
-
-    return block.substr(start, len);
-};
-
-std::vector<int> fetchUIDs(const std::string &imap, const std::string &email, const std::string &password) {
-    CURL *curl = curl_easy_init();
+std::vector<emailData> fetchMail(const std::string& imap, const std::string& email, const std::string& password) {
+    /* Get all the UIDs for each email for fetching */
+    CURL* curl = curl_easy_init();
     std::string response;
 
     curl_easy_setopt(curl, CURLOPT_URL, imap.c_str());
@@ -101,99 +131,26 @@ std::vector<int> fetchUIDs(const std::string &imap, const std::string &email, co
     curl_easy_cleanup(curl);
 
     std::vector<int> uids;
-
     size_t pos = response.find("SEARCH");
-    if (pos == std::string::npos) return uids;
 
     std::stringstream ss(response.substr(pos + 6));
     int uid;
     while (ss >> uid)
         uids.push_back(uid);
 
-    return uids;
-}
+    if (uids.empty()) return {}; // No mail
 
-std::vector<emailData> fetchMail(const std::string &imap, const std::string &email, const std::string &password) {
-    auto uids = fetchUIDs(imap, email, password);
-    if (uids.empty()) return {};
-
-    if (uids.size() > 30)
+    if (uids.size() > 30) // Hard cap mail at 30
         uids.erase(uids.begin(), uids.end() - 30);
 
-    // Build UID list
-    std::string uidList;
-    for (size_t i = 0; i < uids.size(); i++) {
-        uidList += std::to_string(uids[i]);
-        if (i + 1 < uids.size()) uidList += ",";
-    }
-
-    CURL *curl = curl_easy_init();
-    std::string headerResponse;
-
-    std::string headerCmd = "UID FETCH " + uidList + " (BODY.PEEK[HEADER.FIELDS (SUBJECT FROM DATE)])";
-
-    curl_easy_setopt(curl, CURLOPT_URL, imap.c_str());
-    curl_easy_setopt(curl, CURLOPT_USERNAME, email.c_str());
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, password.c_str());
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, headerCmd.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &headerResponse);
-
-    curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-
-    auto headerBlocks = parseFetchBlocks(headerResponse);
-
-    // Map UID → emailData
-    std::map<int,emailData> emails;
-
-    for (auto &p : headerBlocks) {
-        int uid = p.first;
-        const std::string &block = p.second;
-
-        emailData e;
-        e.vbox = nullptr;
-
-        std::string literal = extractLiteral(block);
-
-        e.subject  = extractField(literal, "Subject: ");
-        e.from     = extractField(literal, "From: ");
-        e.sendDate = extractField(literal, "Date: ");
-
-        emails[uid] = e;
-    };
+    std::vector<emailData> emails;
+    emails.reserve(uids.size());
 
     for (int uid : uids) {
-        CURL *curl2 = curl_easy_init();
-        std::string bodyResponse;
-
-        std::string bodyCmd = "UID FETCH " + std::to_string(uid) + " (BODY.PEEK[TEXT])";
-
-        curl_easy_setopt(curl2, CURLOPT_URL, imap.c_str());
-        curl_easy_setopt(curl2, CURLOPT_USERNAME, email.c_str());
-        curl_easy_setopt(curl2, CURLOPT_PASSWORD, password.c_str());
-        curl_easy_setopt(curl2, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-
-        curl_easy_setopt(curl2, CURLOPT_CUSTOMREQUEST, bodyCmd.c_str());
-        curl_easy_setopt(curl2, CURLOPT_WRITEFUNCTION, writeCb);
-        curl_easy_setopt(curl2, CURLOPT_WRITEDATA, &bodyResponse);
-
-        curl_easy_perform(curl2);
-        curl_easy_cleanup(curl2);
-
-        auto blocks = parseFetchBlocks(bodyResponse);
-        if (!blocks.empty()) {
-            std::string literal = extractLiteral(blocks[0].second);
-            emails[uid].message = literal;
-        };
+        emailData mail { nullptr };
+        fetchSingleEmail(imap, email, password, uid, mail);
+        emails.push_back(mail);
     };
 
-    std::vector<emailData> out;
-    out.reserve(uids.size());
-    for (int uid : uids)
-        out.push_back(emails[uid]);
-
-    return out;
+    return emails;
 };

@@ -11,13 +11,13 @@
           # For build
           meson
           ninja
-          curl
           pkg-config
           gtk2
           tinyxxd
+          curl # Fetch mail
+          gmime3 # Email MIME parsing lib
 
-          # Rasterize SVG icons
-          librsvg
+          librsvg # Rasterize SVG icons
 
           # Fix adwaita warnings
           gtk-engine-murrine

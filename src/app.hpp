@@ -6,9 +6,9 @@
 struct emailData {
   GtkWidget *vbox;
   std::string subject;
+  std::string message;
   std::string from;
   std::string sendDate;
-  std::string message;
 };
 
 int mailList(GtkWidget *vbox);

@@ -1,6 +1,8 @@
 #include <curl/curl.h>
 #include <string>
+#include <thread>
 #include <vector>
+#include <functional>
 #include <sstream>
 #include <gmime/gmime.h>
 #include "../app.hpp"
@@ -130,27 +132,44 @@ std::vector<emailData> fetchMail(const std::string& imap, const std::string& ema
     curl_easy_perform(curl);
     curl_easy_cleanup(curl);
 
-    std::vector<int> uids;
     size_t pos = response.find("SEARCH");
 
     std::stringstream ss(response.substr(pos + 6));
+    std::vector<int> uids;
     int uid;
-    while (ss >> uid)
-        uids.push_back(uid);
+    while (ss >> uid) uids.push_back(uid);
 
-    if (uids.empty()) return {}; // No mail
+    if (uids.empty()) return emails; // No mail at all
 
     if (uids.size() > 30) // Hard cap mail at 30
         uids.erase(uids.begin(), uids.end() - 30);
 
-    std::vector<emailData> emails;
-    emails.reserve(uids.size());
+    std::vector<int> newUIDs;
+    for (int uid: uids)
+        if (uid > currMailUID)
+            newUIDs.push_back(uid);
 
-    for (int uid : uids) {
+    if (newUIDs.empty()) return emails; // No new mail
+
+    for (int uid: newUIDs) {
         emailData mail { nullptr };
         fetchSingleEmail(imap, email, password, uid, mail);
         emails.push_back(mail);
     };
 
+    currMailUID = newUIDs.back();
     return emails;
+};
+
+void fetchMailAsync(const std::string& imap, const std::string& email, const std::string& password, std::function<void()> onDone) {
+    std::thread([=]() {
+        fetchMail(imap, email, password); // updates global emails
+
+        g_idle_add([](void* data) -> gboolean {
+            auto* cb = static_cast<std::function<void()>*>(data);
+            (*cb)();
+            delete cb;
+            return FALSE;
+        }, new std::function<void()>(onDone));
+    }).detach();
 };

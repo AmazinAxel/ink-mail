@@ -9,7 +9,9 @@
 
 void refreshMail(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   GtkWidget *vbox = GTK_WIDGET(data);
-  mailList(vbox);
+  fetchMailAsync(IMAP, EMAIL, PASSWORD, [=]() {
+    mailList(vbox);
+  });
 };
 
 int mailList(GtkWidget *vbox) {
@@ -77,19 +79,36 @@ int mailList(GtkWidget *vbox) {
 
   // Fetching
   gtk_box_pack_start(GTK_BOX(listBox), horizontalRule(), FALSE, FALSE, 0);
-  GtkWidget *fetchText = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(fetchText), "<span size=\"25000\" foreground=\"black\">Fetching mail...</span>");
-  gtk_box_pack_start(GTK_BOX(listBox), fetchText, FALSE, FALSE, 10);
-  gtk_widget_show_all(vbox);
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  std::vector<emailData> allMail = fetchMail(IMAP, EMAIL, PASSWORD);
+  if (emails.empty()) {
+    GtkWidget *fetchText = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(fetchText), "<span size=\"25000\" foreground=\"black\">Fetching mail...</span>");
+    gtk_box_pack_start(GTK_BOX(listBox), fetchText, FALSE, FALSE, 10);
+    gtk_widget_show_all(vbox);
 
-  for (auto &mail : allMail)
-    gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()), FALSE, FALSE, 0);
+    fetchMailAsync(IMAP, EMAIL, PASSWORD, [listBox, vbox]() {
+      gtk_container_foreach(GTK_CONTAINER(listBox), [](GtkWidget* w, gpointer){
+        gtk_widget_destroy(w);
+      }, nullptr);
 
-  curl_global_cleanup();
+      gtk_box_pack_start(GTK_BOX(listBox), horizontalRule(), FALSE, FALSE, 0);
 
-  gtk_widget_show_all(vbox);
+      for (auto &mail : emails)
+        gtk_box_pack_start(GTK_BOX(listBox),
+          mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()),
+          FALSE, FALSE, 0);
+
+      gtk_widget_show_all(vbox);
+    });
+
+  } else {
+    for (auto &mail : emails)
+      gtk_box_pack_start(GTK_BOX(listBox),
+        mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()),
+        FALSE, FALSE, 0);
+
+    gtk_widget_show_all(vbox);
+  };
+
   return 0;
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <functional>
 #include <vector>
 #include <gtk-2.0/gtk/gtk.h>
 
@@ -17,6 +18,9 @@ GtkWidget* mailPage(GtkWidget *vbox, const char *title, const char *message, con
 void clearWindow(GtkWidget *container);
 GtkWidget* horizontalRule();
 
-std::vector<emailData> fetchMail(const std::string &imap, const std::string &email, const std::string &password);
+void fetchMailAsync(const std::string& imap, const std::string& email, const std::string& password, std::function<void()> onDone);
 
-extern GdkColor white; // defined in main.cpp
+// All defined in main.cpp
+extern GdkColor white;
+extern std::vector<emailData> emails;
+extern int currMailUID;

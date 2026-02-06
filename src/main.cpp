@@ -5,6 +5,8 @@
 #include "icons/arrowBack_icon.h"
 
 GdkColor white; // Global white var
+std::vector<emailData> emails;
+int currMailUID = 0;
 
 int main(int argc, char *argv[]) {
   gtk_init(&argc, &argv);

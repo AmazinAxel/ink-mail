@@ -6,6 +6,8 @@ An email client for e-ink displays.
 
 Email server login details are hardcoded into the build process. You must compile the program yourself to enter your email server details.
 
+Note that this app requires your IMAP server to support relative queries (which is quite common but if you encounter errors please try a different server)
+
 ### Prebuilt binaries
 
 I only provide prebuilt binaries as a testing convinience. Since this program offers no way of entering or saving email logins, all my prebuilt binaries provided use a test email that I set up. You can email it at `inkling@amazinaxel.com` and use the prebuilt to preview those messages in real time. I may shut down the email in the future.

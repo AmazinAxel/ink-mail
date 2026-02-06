@@ -9,7 +9,6 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
     return size * nmemb;
 };
 
-// todo replace demo
 std::string fetch_latest_email_raw(const std::string &server, const std::string &user, const std::string &pass) {
     CURL *curl = curl_easy_init();
     std::string response;
@@ -19,12 +18,13 @@ std::string fetch_latest_email_raw(const std::string &server, const std::string 
     curl_easy_setopt(curl, CURLOPT_URL, server.c_str());
     curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "FETCH 2:* (BODY[HEADER.FIELDS (SUBJECT FROM DATE)])");
+    // Hardcoded fetch - only 30 latest emails
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "FETCH *-29:* (BODY[HEADER.FIELDS (SUBJECT FROM DATE)])");
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-    CURLcode res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
     curl_easy_cleanup(curl);
     return response;
 };

@@ -74,6 +74,11 @@ int mailList(GtkWidget *vbox) {
   GtkWidget *viewport = gtk_bin_get_child(GTK_BIN(mailListScrollbar));
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
+  // Fetching text
+  GtkWidget *fetchText = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(fetchText), "<span size=\"25000\" foreground=\"black\">Fetching mail...</span>");
+  gtk_box_pack_start(GTK_BOX(listBox), fetchText, FALSE, FALSE, 10);
+
   curl_global_init(CURL_GLOBAL_DEFAULT);
   std::string raw = fetch_latest_email_raw(IMAP, EMAIL, PASSWORD);
   curl_global_cleanup();

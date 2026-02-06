@@ -7,15 +7,25 @@
 #include <curl/curl.h>
 #include <iostream>
 
-void refreshMail(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+GtkWidget *globalRefreshButton;
+
+void refreshMail(GtkWidget*, GdkEventButton*, gpointer data) {
+  // Make refresh button not clickable
+  gtk_widget_set_sensitive(globalRefreshButton, FALSE);
+
   GtkWidget *vbox = GTK_WIDGET(data);
-  fetchMailAsync(IMAP, EMAIL, PASSWORD, [=]() {
-    mailList(vbox);
-  });
+
+  gtk_box_pack_start(GTK_BOX(vbox), horizontalRule(), FALSE, FALSE, 0);
+  GtkWidget *fetchText = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(fetchText), "<span size=\"25000\" foreground=\"black\">Fetching mail...</span>");
+  gtk_box_pack_start(GTK_BOX(vbox), fetchText, FALSE, FALSE, 10);
+  gtk_widget_show_all(vbox);
+
+  fetchMailAsync(IMAP, EMAIL, PASSWORD, [=]() { mailList(vbox); });
 };
 
 int mailList(GtkWidget *vbox) {
-  clearWindow(vbox); // Cleanup
+  clearWindow(vbox); // Cleanup & hide Fetching mail text
 
   /* Top title/navigation bar */
   GtkWidget *nav = gtk_hbox_new(FALSE, 0);
@@ -56,9 +66,12 @@ int mailList(GtkWidget *vbox) {
   g_object_unref(refreshPixbuf);
 
   GtkWidget *refreshButton = gtk_event_box_new();
+  globalRefreshButton = refreshButton; // For disabling while refreshing
+
   gtk_container_add(GTK_CONTAINER(refreshButton), refreshIcon);
   g_signal_connect(refreshButton, "button-press-event", G_CALLBACK(refreshMail), vbox);
   gtk_widget_modify_bg(refreshButton, GTK_STATE_NORMAL, &white);
+  gtk_widget_modify_bg(refreshButton, GTK_STATE_INSENSITIVE, &white); // For when button is disabled
   gtk_box_pack_end(navBox, refreshButton, FALSE, FALSE, 10);
 
   /* Mail list */
@@ -78,35 +91,11 @@ int mailList(GtkWidget *vbox) {
   gtk_widget_modify_bg(viewport, GTK_STATE_NORMAL, &white);
 
   // Fetching
-  gtk_box_pack_start(GTK_BOX(listBox), horizontalRule(), FALSE, FALSE, 0);
-
   if (emails.empty()) {
-    GtkWidget *fetchText = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(fetchText), "<span size=\"25000\" foreground=\"black\">Fetching mail...</span>");
-    gtk_box_pack_start(GTK_BOX(listBox), fetchText, FALSE, FALSE, 10);
-    gtk_widget_show_all(vbox);
-
-    fetchMailAsync(IMAP, EMAIL, PASSWORD, [listBox, vbox]() {
-      gtk_container_foreach(GTK_CONTAINER(listBox), [](GtkWidget* w, gpointer){
-        gtk_widget_destroy(w);
-      }, nullptr);
-
-      gtk_box_pack_start(GTK_BOX(listBox), horizontalRule(), FALSE, FALSE, 0);
-
-      for (auto &mail : emails)
-        gtk_box_pack_start(GTK_BOX(listBox),
-          mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()),
-          FALSE, FALSE, 0);
-
-      gtk_widget_show_all(vbox);
-    });
-
+    refreshMail(nullptr, nullptr, vbox);
   } else {
     for (auto &mail : emails)
-      gtk_box_pack_start(GTK_BOX(listBox),
-        mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()),
-        FALSE, FALSE, 0);
-
+      gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str()), FALSE, FALSE, 0);
     gtk_widget_show_all(vbox);
   };
 

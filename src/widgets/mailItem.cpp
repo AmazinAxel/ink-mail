@@ -5,9 +5,9 @@
 #include "../icons/clock_icon.h"
 
 gboolean openMail(GtkWidget *eventBox, GdkEventButton *event, gpointer data) {
-  Mail *ctx = (Mail*)data;
+  emailData *ctx = (emailData*)data;
 
-  GtkWidget *page = mailPage(ctx->vbox, ctx->title, ctx->message, ctx->sender, ctx->time);
+  GtkWidget *page = mailPage(ctx->vbox, ctx->subject.c_str(), ctx->message.c_str(), ctx->from.c_str(), ctx->sendDate.c_str());
   gtk_box_pack_start(GTK_BOX(ctx->vbox), page, TRUE, TRUE, 0);
   gtk_widget_show_all(ctx->vbox);
 
@@ -74,7 +74,7 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   // Clickable event box
   gtk_container_add(GTK_CONTAINER(eventBox), box);
-  Mail *ctx = new Mail{vbox, title, message, sender, time};
+  emailData *ctx = new emailData{vbox, title, message, sender, time};
   g_signal_connect(eventBox, "button-press-event", G_CALLBACK(openMail), ctx);
   return eventBox;
 };

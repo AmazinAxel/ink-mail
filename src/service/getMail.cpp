@@ -1,6 +1,7 @@
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
+#include "../app.hpp"
 
 // buffer (idk what this does tbh)
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {

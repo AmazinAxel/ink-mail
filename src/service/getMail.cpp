@@ -50,7 +50,7 @@ static std::string getPlaintext(GMimeObject* obj) {
 static bool fetchSingleEmail(const std::string& imap, const std::string& email, const std::string& password, int uid, emailData& out) {
     CURL* curl = curl_easy_init();
     std::string response;
-    std::string request = "UID FETCH " + std::to_string(uid) + " (BODY.PEEK[])";
+    std::string request = "UID FETCH " + std::to_string(uid) + " (FLAGS BODY.PEEK[])";
 
     curl_easy_setopt(curl, CURLOPT_URL, imap.c_str());
     curl_easy_setopt(curl, CURLOPT_USERNAME, email.c_str());
@@ -88,6 +88,20 @@ static bool fetchSingleEmail(const std::string& imap, const std::string& email, 
         g_object_unref(parser);
         g_object_unref(stream);
         return false;
+    };
+
+    // Read/unread
+    size_t flagsPos = response.find("FLAGS");
+    if (flagsPos != std::string::npos) {
+        size_t open = response.find('(', flagsPos);
+        size_t close = response.find(')', open);
+        if (open != std::string::npos && close != std::string::npos) {
+            std::string flags = response.substr(open + 1, close - open - 1);
+            if (flags.find("\\Seen") == std::string::npos)
+                out.isRead = true;
+            else
+                out.isRead = false;
+        };
     };
 
     // Message subject
@@ -141,8 +155,8 @@ std::vector<emailData> fetchMail(const std::string& imap, const std::string& ema
 
     if (uids.empty()) return emails; // No mail at all
 
-    if (uids.size() > 30) // Hard cap mail at 30
-        uids.erase(uids.begin(), uids.end() - 30);
+    if (uids.size() > 10) // Hard cap mail at 10
+        uids.erase(uids.begin(), uids.end() - 10);
 
     std::vector<int> newUIDs;
     for (int uid: uids)
@@ -152,7 +166,7 @@ std::vector<emailData> fetchMail(const std::string& imap, const std::string& ema
     if (newUIDs.empty()) return emails; // No new mail
 
     for (int uid: newUIDs) {
-        emailData mail { nullptr };
+        emailData mail { };
         fetchSingleEmail(imap, email, password, uid, mail);
         emails.push_back(mail);
     };

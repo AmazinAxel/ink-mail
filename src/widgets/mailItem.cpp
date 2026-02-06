@@ -4,7 +4,7 @@
 #include "../icons/mail_icon.h"
 #include "../icons/clock_icon.h"
 
-gboolean openMail(GtkWidget *eventBox, GdkEventButton *event, gpointer data) {
+gboolean openMail(GtkWidget*, GdkEventButton*, gpointer data) {
   emailData *ctx = (emailData*)data;
 
   GtkWidget *page = mailPage(ctx->vbox, ctx->subject.c_str(), ctx->message.c_str(), ctx->from.c_str(), ctx->sendDate.c_str());
@@ -14,7 +14,7 @@ gboolean openMail(GtkWidget *eventBox, GdkEventButton *event, gpointer data) {
   return true;
 };
 
-GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time) {
+GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time, const bool isRead) {
   GtkWidget *titleRow = gtk_hbox_new(FALSE, 2);
   GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *eventBox = gtk_event_box_new();
@@ -22,24 +22,28 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   gtk_box_pack_start(GTK_BOX(box), horizontalRule(), FALSE, FALSE, 0);
 
+  const char * color = "#000";
+  if (isRead)
+    color = "#383838";
+
   // Labels
-  GtkWidget *titleLabel = gtk_label_new(NULL);
-  std::string titleMarkup = "<span size=\"20000\" foreground=\"black\">" + std::string(g_markup_escape_text(title, -1)) + "</span>";
+  GtkWidget *titleLabel = gtk_label_new(nullptr);
+  std::string titleMarkup = "<span size=\"20000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(title, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(titleLabel), titleMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(titleLabel), 0.0, 0.5); // Left align
 
-  GtkWidget *messageLabel = gtk_label_new(message);
-  std::string messageMarkup = "<span size=\"15000\" foreground=\"black\">" + std::string(g_markup_escape_text(message, -1)) + "</span>";
+  GtkWidget *messageLabel = gtk_label_new(nullptr);
+  std::string messageMarkup = "<span size=\"15000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(message, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(messageLabel), messageMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(messageLabel), 0.0, 0.5); // Left align
 
-  GtkWidget *senderLabel = gtk_label_new(sender);
-  std::string senderMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(g_markup_escape_text(sender, -1)) + "</span>";
+  GtkWidget *senderLabel = gtk_label_new(nullptr);
+  std::string senderMarkup = "<span size=\"12000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(sender, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(senderLabel), senderMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(senderLabel), 0.0, 0.5); // Left align
 
-  GtkWidget *timeLabel = gtk_label_new(time);
-  std::string timeMarkup = "<span size=\"12000\" foreground=\"black\">" + std::string(g_markup_escape_text(time, -1)) + "</span>";
+  GtkWidget *timeLabel = gtk_label_new(nullptr);
+  std::string timeMarkup = "<span size=\"12000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(time, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(timeLabel), timeMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(timeLabel), 1.0, 0.5); // Right align
 
@@ -70,6 +74,15 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
   // Title, sender, message
   gtk_box_pack_start(GTK_BOX(box), titleRow, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(box), senderRow, TRUE, TRUE, 0);
+
+  if (isRead) {
+    GtkWidget *notReadLabel = gtk_label_new(nullptr);
+    std::string notReadMarkup = "<span size=\"12000\" foreground=\""  + std::string(color) + "\">(Read)</span>";
+    gtk_label_set_markup(GTK_LABEL(notReadLabel), notReadMarkup.c_str());
+    gtk_misc_set_alignment(GTK_MISC(notReadLabel), 0.0, 0.5); // Left align
+    gtk_box_pack_start(GTK_BOX(box), notReadLabel, FALSE, FALSE, 0);
+  };
+
   gtk_box_pack_start(GTK_BOX(box), messageLabel, FALSE, FALSE, 0);
 
   // Clickable event box

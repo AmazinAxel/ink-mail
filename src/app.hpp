@@ -10,14 +10,18 @@ struct emailData {
   std::string message;
   std::string from;
   std::string sendDate;
-  bool isRead = false;
+  bool isRead;
+  int uid;
 };
 
-int mailList(GtkWidget *vbox);
-GtkWidget* mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time, const bool isRead);
-GtkWidget* mailPage(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time);
+// Utils
 void clearWindow(GtkWidget *container);
 GtkWidget* horizontalRule();
+
+int mailList(GtkWidget *vbox);
+GtkWidget* mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time, const bool isRead, int uid);
+GtkWidget* mailPage(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time);
+bool markEmailAsRead(const std::string& imap, const std::string& email, const std::string& password, int uid);
 
 void fetchMailAsync(const std::string& imap, const std::string& email, const std::string& password, std::function<void()> onDone);
 

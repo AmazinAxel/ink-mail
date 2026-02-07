@@ -16,6 +16,7 @@ gmime_dep = dependency('gmime-3.0')
 
 sources = files(
   './src/service/getMail.cpp',
+  './src/service/markAsRead.cpp',
   './src/widgets/mailItem.cpp',
   './src/mailList.cpp',
   './src/mailPage.cpp',

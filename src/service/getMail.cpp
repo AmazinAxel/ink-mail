@@ -1,13 +1,15 @@
 #include <curl/curl.h>
 #include <string>
 #include <thread>
+#include <algorithm>
 #include <vector>
 #include <functional>
 #include <sstream>
 #include <gmime/gmime.h>
 #include "../app.hpp"
 
-static size_t writeCb(char* ptr, size_t size, size_t nmemb, void* userdata) { // curl
+// Curl write callback
+static size_t writeCb(char* ptr, size_t size, size_t nmemb, void* userdata) {
     auto* out = static_cast<std::string*>(userdata);
     out->append(ptr, size * nmemb);
     return size * nmemb;
@@ -45,6 +47,19 @@ static std::string getPlaintext(GMimeObject* obj) {
         };
     };
     return {};
+};
+
+static std::string removeLinks(const std::string& s) {
+    std::string out;
+    out.reserve(s.size());
+
+    bool inside = false;
+    for (char c : s) {
+        if (c == '<') { inside = true; continue; }
+        if (c == '>') { inside = false; continue; }
+        if (!inside) out.push_back(c);
+    };
+    return out;
 };
 
 static bool fetchSingleEmail(const std::string& imap, const std::string& email, const std::string& password, int uid, emailData& out) {
@@ -98,9 +113,9 @@ static bool fetchSingleEmail(const std::string& imap, const std::string& email, 
         if (open != std::string::npos && close != std::string::npos) {
             std::string flags = response.substr(open + 1, close - open - 1);
             if (flags.find("\\Seen") == std::string::npos)
-                out.isRead = true;
-            else
                 out.isRead = false;
+            else
+                out.isRead = true;
         };
     };
 
@@ -120,7 +135,10 @@ static bool fetchSingleEmail(const std::string& imap, const std::string& email, 
 
     // Body message
     GMimeObject* root = g_mime_message_get_mime_part(msg);
-    out.message = getPlaintext(root);
+    out.message = removeLinks(getPlaintext(root));
+
+    // Mail UID
+    out.uid = uid;
 
     // Cleanup
     g_object_unref(msg);
@@ -166,12 +184,12 @@ std::vector<emailData> fetchMail(const std::string& imap, const std::string& ema
     if (newUIDs.empty()) return emails; // No new mail
 
     for (int uid: newUIDs) {
-        emailData mail { };
+        emailData mail {};
         fetchSingleEmail(imap, email, password, uid, mail);
-        emails.push_back(mail);
+        emails.insert(emails.begin(), mail);
     };
 
-    currMailUID = newUIDs.back();
+    currMailUID = newUIDs.front();
     return emails;
 };
 

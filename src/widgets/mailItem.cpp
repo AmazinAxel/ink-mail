@@ -11,10 +11,13 @@ gboolean openMail(GtkWidget*, GdkEventButton*, gpointer data) {
   gtk_box_pack_start(GTK_BOX(ctx->vbox), page, TRUE, TRUE, 0);
   gtk_widget_show_all(ctx->vbox);
 
+  if (!ctx->uid)
+    markEmailAsRead(IMAP, EMAIL, PASSWORD, ctx->uid);
+
   return true;
 };
 
-GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time, const bool isRead) {
+GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, const char *sender, const char *time, const bool isRead, int uid) {
   GtkWidget *titleRow = gtk_hbox_new(FALSE, 2);
   GtkWidget *box = gtk_vbox_new(FALSE, 2);
   GtkWidget *eventBox = gtk_event_box_new();
@@ -24,18 +27,24 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   const char * color = "#000";
   if (isRead)
-    color = "#383838";
+    color = "#535353";
 
   // Labels
   GtkWidget *titleLabel = gtk_label_new(nullptr);
   std::string titleMarkup = "<span size=\"20000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(title, -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(titleLabel), titleMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(titleLabel), 0.0, 0.5); // Left align
+  gtk_label_set_max_width_chars(GTK_LABEL(titleLabel), 20);
+  gtk_label_set_ellipsize(GTK_LABEL(titleLabel), PANGO_ELLIPSIZE_END);
+
+  std::string msgEllipsized = message;
+  if (msgEllipsized.size() > 200) { msgEllipsized = msgEllipsized.substr(0, 200) + "..."; }
 
   GtkWidget *messageLabel = gtk_label_new(nullptr);
-  std::string messageMarkup = "<span size=\"15000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(message, -1)) + "</span>";
+  std::string messageMarkup = "<span size=\"15000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(msgEllipsized.c_str(), -1)) + "</span>";
   gtk_label_set_markup(GTK_LABEL(messageLabel), messageMarkup.c_str());
   gtk_misc_set_alignment(GTK_MISC(messageLabel), 0.0, 0.5); // Left align
+  gtk_label_set_max_width_chars(GTK_LABEL(messageLabel), 200);
 
   GtkWidget *senderLabel = gtk_label_new(nullptr);
   std::string senderMarkup = "<span size=\"12000\" foreground=\""  + std::string(color) + "\">" + std::string(g_markup_escape_text(sender, -1)) + "</span>";
@@ -87,7 +96,7 @@ GtkWidget *mailItem(GtkWidget *vbox, const char *title, const char *message, con
 
   // Clickable event box
   gtk_container_add(GTK_CONTAINER(eventBox), box);
-  emailData *ctx = new emailData{vbox, title, message, sender, time};
+  emailData *ctx = new emailData{ vbox, title, message, sender, time, isRead, uid };
   g_signal_connect(eventBox, "button-press-event", G_CALLBACK(openMail), ctx);
   return eventBox;
 };

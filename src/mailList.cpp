@@ -95,7 +95,7 @@ int mailList(GtkWidget *vbox) {
     refreshMail(nullptr, nullptr, vbox);
   } else {
     for (auto &mail : emails)
-      gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str(), mail.isRead), FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(listBox), mailItem(vbox, mail.subject.c_str(), mail.message.c_str(), mail.from.c_str(), mail.sendDate.c_str(), mail.isRead, mail.uid), FALSE, FALSE, 0);
     gtk_widget_show_all(vbox);
   };
 
